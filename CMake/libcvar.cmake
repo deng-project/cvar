@@ -11,7 +11,8 @@ set(CVAR_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/Include/cvar/SID.h)
 set(CVAR_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Sources/CVarSystem.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Sources/CVarTypes.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/Sources/CVarTypes.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Sources/SID.cpp)
 
 if (NOT CVAR_STATIC)
     add_library(${CVAR_TARGET} SHARED

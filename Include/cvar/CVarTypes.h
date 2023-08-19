@@ -106,9 +106,15 @@ namespace CVar {
     };
 
     typedef std::variant<std::monostate, Int, Float, Bool, String, List, std::shared_ptr<Object>> Value;
+
     struct ValueDescriptor {
         String description;
         Value val;
+
+        void operator=(const ValueDescriptor& _val) {
+            description = _val.description;
+            val = std::move(_val.val);
+        }
     };
 
     class Object {

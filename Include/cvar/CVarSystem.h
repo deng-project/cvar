@@ -77,7 +77,7 @@ namespace CVar {
                     pTable = &pObject->get()->GetContents();
                 }
 
-                pTable->insert(std::make_pair(cvarStrings.back(), ValueDescriptor{ _description, _val }));
+                pTable->insert_or_assign(cvarStrings.back(), ValueDescriptor{ _description, _val });
                 return true;
             }
     };

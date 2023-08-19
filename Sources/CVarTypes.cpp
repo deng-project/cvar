@@ -107,13 +107,16 @@ namespace CVar {
 				}
 
 				auto it2 = obj.first->GetContents().end();
-                std::advance(it2, -1);
-				if (it != it2)
+				if (std::next(it) != it2)
 					_stream << ", ";
 			}
 			
-			_stream << '}';
 			stckObjects.pop();
+
+            if (stckObjects.size() >= 1 && stckObjects.top().second != stckObjects.top().first->GetContents().end())
+                _stream << "}, ";
+            else _stream << '}';
+
 		}
 
 		return _stream;
