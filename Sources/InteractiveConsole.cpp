@@ -14,7 +14,8 @@ static string sHelpText = "Standard mode commands are:\n"\
                           "<variable> - outputs variable value if available\n"\
                           "<variable>=<value> - sets variable value\n\n"\
                           "Command options are denoted with ':cmd'\n"\
-                          ":cmd <json|yaml|sql> filename.<ext> - output variables to file\n";
+                          ":cmd save <json|yaml|xml> filename.<ext> [min] - serialize variables to file\n"\
+                          ":cmd load <json|yaml|xml> filename.<ext> - unserialize variables from file\n";
 
 
 void TrimString(string& _str) {
@@ -140,17 +141,28 @@ void Cmd(const string& _sLine) {
     while (ss >> word)
         words.push_back(word);
 
-    if (words.size() < 3) {
+    if (words.size() < 4) {
         cout << sHelpText;
         return;
-    } else if (words[1] != "json") {
-        cout << "Only json serialization is currently implemented :(\n";
-        return;
-    } else {
-        CVar::CVarSystem& cvarSyst = CVar::CVarSystem::GetInstance();
-        cvarSyst.Serialize<CVar::JSONSerializer>(words[2]);
-        cout << "Serialized to '" << words[2] << "'\n";
-    }
+    } else if (words[1] == "save") {
+        if (words[2] == "json") {
+            CVar::CVarSystem& cvarSyst = CVar::CVarSystem::GetInstance();
+
+            // check if minified json should be used
+            if (words.size() == 5 && words.back() == "min") {
+                cvarSyst.Serialize<CVar::JSONSerializer>(words[3], false);
+            } else {
+                cvarSyst.Serialize<CVar::JSONSerializer>(words[3], true);
+            }
+            cout << "Serialized to '" << words[2] << "'\n";
+        } else if (words[2] == "yaml") {
+            cout << "Yaml serializer is not yet implemented :(\n";
+            return;
+        } else if (words[2] == "xml") {
+            cout << "XML serializer is not yet implemented :(\n";
+            return;
+        }
+    } 
 }
 
 enum class ActionType {

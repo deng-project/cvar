@@ -24,10 +24,10 @@ namespace CVar {
             static CVarSystem& GetInstance();
 
             template <typename T>
-            void Serialize(const std::string& _sFileName) {
+            void Serialize(const std::string& _sFileName, bool bBeautified = true) {
                 std::ofstream stream(_sFileName);
                 T serializer(stream, m_root);
-                serializer.Serialize();
+                serializer.Serialize(bBeautified);
                 stream.close();
             }
 

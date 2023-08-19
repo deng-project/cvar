@@ -14,11 +14,70 @@ namespace CVar {
         ISerializer(_stream, _root) {}
 
 
-    void JSONSerializer::Serialize(bool) {
-        //if (bBeautified)
-            //_SerializeBeautified();
-        //else _SerializeCompact();
-        _SerializeBeautified();
+    void JSONSerializer::Serialize(bool _bBeautified) {
+        if (_bBeautified)
+            _SerializeBeautified();
+        else _SerializeCompact();
+    }
+
+    void JSONSerializer::_SerializeCompact() {
+        m_stream << '{';
+        std::stack<std::pair<std::unordered_map<String, Value>*, std::unordered_map<String, Value>::iterator>> stckObjects;
+        stckObjects.push(std::make_pair(&m_root, m_root.begin()));
+
+        while (!stckObjects.empty()) {
+            BEGIN:
+            auto& top = stckObjects.top();
+
+            for (auto it = top.second; it != top.first->end(); it++) {
+                m_stream << '\"' << it->first << "\":";
+                
+                switch(it->second.index()) {
+                    case Type_Int:
+                        m_stream << std::get<Type_Int>(it->second);
+                        break;
+
+                    case Type_Float:
+                        m_stream << std::get<Type_Float>(it->second);
+                        break;
+
+                    case Type_Bool:
+                        m_stream << (std::get<Type_Bool>(it->second) ? "true" : "false");
+                        break;
+
+                    case Type_String:
+                        m_stream << '\"' << std::get<Type_String>(it->second) << '\"';
+                        break;
+
+                    case Type_List:
+                        m_stream << std::get<Type_List>(it->second);
+                        break;
+
+                    case Type_Object:
+                        {
+                            m_stream << "{";
+                            auto& obj = std::get<Type_Object>(it->second)->GetContents();
+                            it++;
+                            top.second = it;
+                            stckObjects.push(std::make_pair(&obj, obj.begin()));
+                            goto BEGIN;
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+
+                if (std::next(it) != top.first->end())
+                    m_stream << ",";
+            }
+
+            stckObjects.pop();
+            
+            if (stckObjects.size() >= 1 && stckObjects.top().second != stckObjects.top().first->end())
+                m_stream << "},";
+            else m_stream << '}';
+        }
     }
 
 
