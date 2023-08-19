@@ -35,16 +35,16 @@ namespace CVar {
 	}
 
 
-	ValueDescriptor* CVarSystem::_FindNode(const std::string& _key) {
+	Value* CVarSystem::_FindNode(const std::string& _key) {
 		auto hashes = _HashKeyWords(_key);
-		ValueDescriptor* pNode = nullptr;
-		std::unordered_map<String, ValueDescriptor>* pNodeTable = &m_root;
+		Value* pNode = nullptr;
+		std::unordered_map<String, Value>* pNodeTable = &m_root;
 
 		for (size_t i = 0; i < hashes.size(); i++) {
 			auto itNode = pNodeTable->find(hashes[i]);
 			if (itNode != pNodeTable->end()) {
 				pNode = &itNode->second;
-				auto pObject = std::get_if<std::shared_ptr<Object>>(&pNode->val);
+				auto pObject = std::get_if<std::shared_ptr<Object>>(pNode);
 				
 				if (i != hashes.size() - 1 && !pObject)
 					return nullptr;

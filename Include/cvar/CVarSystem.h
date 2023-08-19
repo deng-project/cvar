@@ -13,12 +13,12 @@ namespace CVar {
 
     class CVAR_API CVarSystem {
         private:
-            std::unordered_map<String, ValueDescriptor> m_root;
+            std::unordered_map<String, Value> m_root;
 
         private:
             CVarSystem() = default;
             std::vector<String> _HashKeyWords(const std::string& _key);
-            ValueDescriptor* _FindNode(const std::string& _key);
+            Value* _FindNode(const std::string& _key);
 
         public:
             static CVarSystem& GetInstance();
@@ -27,6 +27,7 @@ namespace CVar {
             void Serialize(const std::string& _sFileName) {
                 std::ofstream stream(_sFileName);
                 T serializer(stream, m_root);
+                serializer.Serialize();
                 stream.close();
             }
 
@@ -38,46 +39,36 @@ namespace CVar {
                 m_root = std::move(unserializer.GetRoot());
             }
 
-            inline String* GetDescription(const std::string& _key) {
-                ValueDescriptor* pDesc = _FindNode(_key);
-                if (pDesc)
-                    return &pDesc->description;
-
-                return nullptr;
-            }
-
             inline Value* GetValue(const std::string& _key) {
-                ValueDescriptor* pDesc = _FindNode(_key);
+                Value* pDesc = _FindNode(_key);
                 if (pDesc)
-                    return &pDesc->val;
+                    return pDesc;
                 return nullptr;
             }
 
             template <typename T>
             inline T* Get(const std::string& _key) {
-                ValueDescriptor* pDesc = _FindNode(_key);
+                Value* pDesc = _FindNode(_key);
                 if (pDesc)
-                    return std::get_if<T>(&pDesc->val);
+                    return std::get_if<T>(pDesc);
             }
 
             template <typename T>
-            bool Set(const String& _key, const String& _description, const T& _val) {
+            bool Set(const String& _key, const T& _val) {
                 std::vector<String> cvarStrings = _HashKeyWords(_key);
-                std::unordered_map<String, ValueDescriptor>* pTable = &m_root;
+                std::unordered_map<String, Value>* pTable = &m_root;
 
                 for (size_t i = 0; i < cvarStrings.size() - 1; i++) {
                     if (pTable->find(cvarStrings[i]) == pTable->end()) {
-                        pTable->insert(std::make_pair(cvarStrings[i], ValueDescriptor{ 
-                            String(),
-                            std::make_shared<Object>()
-                            }));
+                        pTable->insert(std::make_pair(cvarStrings[i], std::make_shared<Object>()));
                     }
-                    auto pObject = std::get_if<std::shared_ptr<Object>>(&pTable->find(cvarStrings[i])->second.val);
-                    if (!pObject) return false;
+                    auto pObject = std::get_if<std::shared_ptr<Object>>(&pTable->find(cvarStrings[i])->second);
+                    if (!pObject) 
+                        return false;
                     pTable = &pObject->get()->GetContents();
                 }
 
-                pTable->insert_or_assign(cvarStrings.back(), ValueDescriptor{ _description, _val });
+                pTable->insert_or_assign(cvarStrings.back(), _val);
                 return true;
             }
     };

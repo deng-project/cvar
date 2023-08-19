@@ -61,7 +61,7 @@ namespace CVar {
     }
 
     std::ostream& operator<<(std::ostream& _stream, Object& _obj) {
-        std::stack<std::pair<Object*, std::unordered_map<String, ValueDescriptor>::iterator>> stckObjects;
+        std::stack<std::pair<Object*, std::unordered_map<String, Value>::iterator>> stckObjects;
 		stckObjects.push(std::make_pair(&_obj, _obj.GetContents().begin()));
 
 		_stream << '{';
@@ -71,27 +71,27 @@ namespace CVar {
 
 			for (auto it = obj.second; it != obj.first->GetContents().end(); it++) {
 				_stream << '\"' << it->first << "\": ";
-				switch (it->second.val.index()) {
+				switch (it->second.index()) {
 					case Type_Bool:
-						_stream << (std::get<Type_Bool>(it->second.val) ? "true" : "false");
+						_stream << (std::get<Type_Bool>(it->second) ? "true" : "false");
 						break;
 
 					case Type_Float:
-						_stream << std::get<Type_Float>(it->second.val);
+						_stream << std::get<Type_Float>(it->second);
 						break;
 
 					case Type_Int:
-						_stream << std::get<Type_Int>(it->second.val);
+						_stream << std::get<Type_Int>(it->second);
 						break;
 
 					case Type_List:
-						_stream << std::get<Type_List>(it->second.val);
+						_stream << std::get<Type_List>(it->second);
 						break;
 
 					case Type_Object:
 					{
 						_stream << '{';
-						auto pObject = std::get<Type_Object>(it->second.val).get();
+						auto pObject = std::get<Type_Object>(it->second).get();
 						it++;
 						obj.second = it;
 						stckObjects.push(std::make_pair(pObject, pObject->GetContents().begin()));
@@ -99,7 +99,7 @@ namespace CVar {
 					}
 
 					case Type_String:
-						_stream << '\"' << std::get<Type_String>(it->second.val) << '\"';
+						_stream << '"' << std::get<Type_String>(it->second) << '"';
 						break;
 
 					default:

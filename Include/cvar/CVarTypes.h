@@ -107,26 +107,16 @@ namespace CVar {
 
     typedef std::variant<std::monostate, Int, Float, Bool, String, List, std::shared_ptr<Object>> Value;
 
-    struct ValueDescriptor {
-        String description;
-        Value val;
-
-        void operator=(const ValueDescriptor& _val) {
-            description = _val.description;
-            val = std::move(_val.val);
-        }
-    };
-
     class Object {
         private:
-            using _Contents = std::unordered_map<String, ValueDescriptor>;
+            using _Contents = std::unordered_map<String, Value>;
             _Contents m_contents;
 
         public:
             Object() = default;
 
-            inline void PushNode(const String& _key, const String& _description, const Value& _val) {
-                m_contents.emplace(std::make_pair(_key, ValueDescriptor{ _description, _val }));
+            inline void PushNode(const String& _key, const Value& _val) {
+                m_contents.emplace(std::make_pair(_key, _val));
             }
 
             inline _Contents& GetContents() { return m_contents; }

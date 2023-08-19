@@ -6,8 +6,15 @@
 #include <iostream>
 #include <sstream>
 #include <cvar/CVarSystem.h>
+#include <cvar/JSONSerializer.h>
 
 using namespace std;
+
+static string sHelpText = "Standard mode commands are:\n"\
+                          "<variable> - outputs variable value if available\n"\
+                          "<variable>=<value> - sets variable value\n\n"\
+                          "Command options are denoted with ':cmd'\n"\
+                          ":cmd <json|yaml|sql> filename.<ext> - output variables to file\n";
 
 
 void TrimString(string& _str) {
@@ -58,19 +65,19 @@ void Set(const string& _sLine) {
 
     switch (type) {
         case CVar::Type_String:
-            cvarSyst.Set<CVar::String>(sVarName, "", sValue.substr(1, sValue.size()-2));
+            cvarSyst.Set<CVar::String>(sVarName, sValue.substr(1, sValue.size()-2));
             break;
 
         case CVar::Type_Bool:
-            cvarSyst.Set<CVar::Bool>(sVarName, "", (sValue == "true" ? true : false));
+            cvarSyst.Set<CVar::Bool>(sVarName, (sValue == "true" ? true : false));
             break;
 
         case CVar::Type_Int:
-            cvarSyst.Set<CVar::Int>(sVarName, "", static_cast<CVar::Int>(std::stoi(sValue)));
+            cvarSyst.Set<CVar::Int>(sVarName, static_cast<CVar::Int>(std::stoi(sValue)));
             break;
 
         case CVar::Type_Float:
-            cvarSyst.Set<CVar::Float>(sVarName, "", static_cast<CVar::Float>(std::stof(sValue)));
+            cvarSyst.Set<CVar::Float>(sVarName, static_cast<CVar::Float>(std::stof(sValue)));
             break;
 
         default:
@@ -125,9 +132,31 @@ string Get(const string& _sLine) {
     return ss.str();
 }
 
+void Cmd(const string& _sLine) {
+    stringstream ss(_sLine);
+    std::vector<string> words;
+
+    string word;
+    while (ss >> word)
+        words.push_back(word);
+
+    if (words.size() < 3) {
+        cout << sHelpText;
+        return;
+    } else if (words[1] != "json") {
+        cout << "Only json serialization is currently implemented :(\n";
+        return;
+    } else {
+        CVar::CVarSystem& cvarSyst = CVar::CVarSystem::GetInstance();
+        cvarSyst.Serialize<CVar::JSONSerializer>(words[2]);
+        cout << "Serialized to '" << words[2] << "'\n";
+    }
+}
+
 enum class ActionType {
     Set,
-    Get
+    Get,
+    Cmd
 };
 
 
@@ -135,15 +164,19 @@ inline ActionType FindActionType(const string& _sLine) {
     if (_sLine.find('=') != string::npos) {
         return ActionType::Set;
     }
+    else if (_sLine.find(":cmd ") == 0)
+        return ActionType::Cmd;
     else return ActionType::Get;
 }
 
 int main(void) {
     cout << "Welcome to interactive CVar console!\n"\
             "Type <variable> to see value\n"\
-            "Type <variable>=<value> to set a value\n" << endl;
+            "Type <variable>=<value> to set a value\n"\
+            "Type help for more options\n";
 
     string sPrompt = "InteractiveConsole > ";
+
     while (true) {
         cout << sPrompt;
         cout.flush();
@@ -153,11 +186,24 @@ int main(void) {
 
         if (sLine == "exit" || sLine == "quit")
             break;
+        else if (sLine == "help")
+            cout << sHelpText;
+
         ActionType actType = FindActionType(sLine);
 
-        if (actType == ActionType::Set)
-            Set(sLine);
-        else cout << Get(sLine) << endl;
+        switch (actType) {
+            case ActionType::Set:
+                Set(sLine);
+                break;
+
+            case ActionType::Get:
+                cout << Get(sLine) << '\n';
+                break;
+
+            case ActionType::Cmd:
+                Cmd(sLine);
+                break;
+        }
     }
     return 0;
 }
