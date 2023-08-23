@@ -163,6 +163,10 @@ void Cmd(const string& _sLine) {
             return;
         }
     } 
+    else if (words[1] == "load") {
+        cout << std::uppercase << words[2] << "unserializer is not yet implemented :(\n";
+        return;
+    }
 }
 
 enum class ActionType {

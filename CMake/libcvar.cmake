@@ -10,12 +10,14 @@ set(CVAR_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/Include/cvar/CVarTypes.h
     ${CMAKE_CURRENT_SOURCE_DIR}/Include/cvar/ISerializer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/Include/cvar/JSONSerializer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/Include/cvar/JSONUnserializer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/Include/cvar/SID.h)
 
 set(CVAR_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Sources/CVarSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sources/CVarTypes.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sources/JSONSerializer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Sources/JSONUnserializer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Sources/SID.cpp)
 
 if (NOT CVAR_STATIC)
