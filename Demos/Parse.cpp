@@ -4,6 +4,8 @@
 // author: Karl-Mihkel Ott
 
 #include <cvar/JSONUnserializer.h>
+#include <cvar/JSONSerializer.h>
+#include <cvar/CVarSystem.h>
 #include <iostream>
 #include <fstream>
 
@@ -11,7 +13,8 @@ int main(int argc, char* argv[]) {
     if (argc < 2)
         std::cout << "Usage: Parse <file>\n";
 
-    std::ifstream stream(argv[1]);
-    CVar::JSONUnserializer unserializer(stream);
+    CVar::CVarSystem& cvarSyst = CVar::CVarSystem::GetInstance();
+    cvarSyst.Unserialize<CVar::JSONUnserializer>(argv[1]);
+    cvarSyst.Serialize<CVar::JSONSerializer>(std::string(argv[1]) + ".copy");
     return 0;
 }

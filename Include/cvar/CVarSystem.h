@@ -35,8 +35,8 @@ namespace CVar {
             template <typename T>
             void Unserialize(const std::string& _sFileName) {
                 std::ifstream stream(_sFileName);
-                T unserializer(_sFileName);
-                m_root = std::move(unserializer.GetRoot());
+                T unserializer(stream);
+                m_root = std::move(unserializer.Get());
             }
 
             inline Value* GetValue(const std::string& _key) {

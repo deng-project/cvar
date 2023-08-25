@@ -8,7 +8,7 @@
 #include <cvar/Api.h>
 #include <cvar/CVarTypes.h>
 #include <ostream>
-#include <istream>
+#include <iostream>
 #include <unordered_map>
 
 namespace CVar {
@@ -29,11 +29,13 @@ namespace CVar {
     class CVAR_API IUnserializer {
         protected:
             std::istream& m_stream;
+            std::ostream& m_errStream;
             std::unordered_map<String, Value> m_root;
 
         public:
-            IUnserializer(std::istream& _stream) :
-                m_stream(_stream) {}
+            IUnserializer(std::istream& _stream, std::ostream& _errStream) :
+                m_stream(_stream),
+                m_errStream(_errStream) {}
 
             inline std::unordered_map<String, Value>&& Get() {
                 return std::move(m_root);
