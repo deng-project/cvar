@@ -113,7 +113,7 @@ namespace CVar {
                         break;
 
                     case Type_List:
-                        m_stream << std::get<Type_List>(it->second) << '\"';
+                        m_stream << std::get<Type_List>(it->second);
                         break;
 
                     case Type_Object:

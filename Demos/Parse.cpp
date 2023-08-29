@@ -23,6 +23,8 @@ int main(int argc, char* argv[]) {
     catch (const CVar::UnexpectedEOFException& e) {
         std::cerr << "[UnexpectedEOFException] " << e.what() << '\n';
     }
-    cvarSyst.Serialize<CVar::JSONSerializer>(std::string(argv[1]) + ".copy");
+
+    CVar::JSONSerializer serializer(std::cout, cvarSyst.GetRoot());
+    serializer.Serialize();
     return 0;
 }

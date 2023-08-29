@@ -215,134 +215,81 @@ namespace CVar {
 
 
     List JSONUnserializer::_ParseList() {
-        return List();
+        List rootList;
+
+        // pair specification:
+        // first - pointer to list
+        // second - boolean flag to indicate if the current value shall be continuation to some previous value
+        std::stack<std::pair<List*, bool>> stckLists;
+        stckLists.push(std::make_pair(&rootList, false));
+
+        while (!stckLists.empty() && _NextToken()) {
+            auto pList = stckLists.top().first;
+            bool& bIsContinuation = stckLists.top().second;
+
+            // check for list end statement
+            if (m_token.token.index() == JSONTokenIndex_Char && std::get<char>(m_token.token) == ']') {
+                stckLists.pop();
+                continue;
+            }
+
+            // check if the current value is a continuation to some other value
+            // if so then expect a comma ',' as the current token
+            if (bIsContinuation && (m_token.token.index() == JSONTokenIndex_Char && std::get<char>(m_token.token) == ','))
+                _NextTokenEx();
+            else if (bIsContinuation) {
+                std::stringstream ss;
+                ss << "Expected a comma separator at line " << m_token.uLine;
+                throw SyntaxErrorException(ss.str());
+            } else {
+                bIsContinuation = true;
+            }
+
+            // expect some kind of <valuetype>
+            switch (m_token.token.index()) {
+                case JSONTokenIndex_Char:
+                    // recursive list (array)
+                    if (std::get<char>(m_token.token) == '[') {
+                        pList->PushBack(std::make_shared<List>());
+                        stckLists.push(std::make_pair(std::get<std::shared_ptr<List>>(*pList->ReverseBegin()).get(), false));
+                        continue;
+                    }
+                    // object inside a list
+                    else if (std::get<char>(m_token.token) == '{') {
+                        pList->PushBack(std::make_shared<Object>());
+                        _ParseObject(&std::get<std::shared_ptr<Object>>(*pList->ReverseBegin()).get()->GetContents());
+                    }
+                    // error otherwise
+                    else {
+                        std::stringstream ss;
+                        ss << "Unexpected identifier '" << std::get<char>(m_token.token) << "'. Expected a valuetype instead.";
+                        throw SyntaxErrorException(ss.str());
+                    }
+                    break;
+
+                case JSONTokenIndex_String:
+                    pList->PushBack(std::get<String>(m_token.token));
+                    break;
+
+                case JSONTokenIndex_Float:
+                    pList->PushBack(std::get<Float>(m_token.token));
+                    break;
+
+                case JSONTokenIndex_Int:
+                    pList->PushBack(std::get<Int>(m_token.token));
+                    break;
+
+                case JSONTokenIndex_Bool:
+                    pList->PushBack(std::get<Bool>(m_token.token));
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        return rootList;
     }
-
-
-    //List JSONUnserializer::_ParseList() {
-        //List rootList;
-        //std::stack<List*> stckList;
-        //stckList.push(&rootList);
-
-        //bool bInitialDecl = false;
-        //while (!m_qTokens.empty() && !stckList.empty()) {
-            //JSONToken* pToken = &m_qTokens.front();
-            //List* pCurrentList = stckList.top();
-
-            //// check for initial list declaration
-            //if (!bInitialDecl && pToken->token.index() == JSONTokenIndex_Char && std::get<char>(pToken->token) == '[') {
-                //m_qTokens.pop();
-                //if (_EofError()) return rootList;
-                //pToken = &m_qTokens.front();
-                //bInitialDecl = true;
-            //} else if (!bInitialDecl) {
-                //m_errStream << "Unexpected identifier '" << pToken->token << "' at line " << pToken->uLine << '\n';
-                //m_qTokens.pop();
-                //return rootList;
-            //}
-
-            //// check for end statement
-            //if (pToken->token.index() == JSONTokenIndex_Char && std::get<char>(pToken->token) == '}') {
-                //m_qTokens.pop();
-                //stckList.pop();
-
-                //if (!stckList.empty()) {
-                    //if (_EofError()) return List();
-                    //pToken = &m_qTokens.front();
-
-                    //if (pToken->token.index() != JSONTokenIndex_Char) {
-                        //m_errStream << "Expected comma before line " << pToken->uLine << '\n';
-                        //return List();
-                    //} 
-                    //else if (std::get<char>(pToken->token) == ',') {
-                        //m_qTokens.pop();
-                    //}
-                //}
-
-                //continue;
-            //}
-
-            //// expect a value
-            //switch (pToken->token.index()) {
-                //case JSONTokenIndex_Char:
-                    //if (std::get<char>(pToken->token) == '[') {
-                        //pCurrentList->PushBack(std::make_shared<List>());
-                        //stckList.push(std::get<std::shared_ptr<List>>(*pCurrentList->ReverseBegin()).get());
-                    //}
-                    //else if (std::get<char>(pToken->token) == '{') {
-                        //pCurrentList->PushBack(std::make_shared<Object>());
-                        //_ParseObject(&std::get<std::shared_ptr<Object>>(*pCurrentList->ReverseBegin()).get()->GetContents());
-                    //}
-                    //else if (std::get<char>(pToken->token) == ']') {
-                        //stckList.pop();
-                        //continue;
-                    //}
-                    //break;
-
-                //case JSONTokenIndex_String:
-                    //pCurrentList->PushBack(std::get<String>(pToken->token));
-                    //break;
-
-                //case JSONTokenIndex_Float:
-                    //pCurrentList->PushBack(std::get<Float>(pToken->token));
-                    //break;
-
-                //case JSONTokenIndex_Int:
-                    //pCurrentList->PushBack(std::get<Int>(pToken->token));
-                    //break;
-
-                //case JSONTokenIndex_Bool:
-                    //pCurrentList->PushBack(std::get<Bool>(pToken->token));
-                    //break;
-
-                //case JSONTokenIndex_JSONNull:
-                    //pCurrentList->PushBack<Int>(0);
-                    //break;
-
-                //default:
-                    //break;
-            //}
-
-            //// expect a continuation or end of list statement
-            //m_qTokens.pop();
-            //if (_EofError()) return rootList;
-            //pToken = &m_qTokens.front();
-
-            //if (pToken->token.index() != JSONTokenIndex_Char) {
-                //m_errStream << "Unexpected token '" << pToken->token << "' at line " << pToken->uLine << '\n';
-                //m_qTokens.pop();
-                //return List();
-            //}
-
-            //if (std::get<char>(pToken->token) == ',') {
-                //m_qTokens.pop();
-            //}
-            //else if (std::get<char>(pToken->token) == ']') {
-                //m_qTokens.pop();
-                //stckList.pop();
-
-                //if (!stckList.empty()) {
-                    //if (_EofError()) return List();
-                    //pToken = &m_qTokens.front();
-
-                    //if (pToken->token.index() != JSONTokenIndex_Char) {
-                        //m_errStream << "Expected comma before line " << pToken->uLine << '\n';
-                        //return List();
-                    //} 
-                    //else if (std::get<char>(pToken->token) == ',') {
-                        //m_qTokens.pop();
-                    //}
-                //}
-            //}
-            //else {
-                //m_errStream << "Unexpected identifier '" << pToken->token << "' at line " << pToken->uLine << '\n';
-                //m_qTokens.pop();
-                //return List();
-            //}
-        //}
-
-        //return rootList;
-    //}
 
 
     void JSONUnserializer::_ParseObject(std::unordered_map<String, Value>* _pRootObject) {
@@ -353,7 +300,7 @@ namespace CVar {
         std::stack<std::pair<std::unordered_map<String, Value>*, bool>> stckObjects;
         stckObjects.push(std::make_pair(_pRootObject, false));
 
-        while (_NextToken() && !stckObjects.empty()) {
+        while (!stckObjects.empty() && _NextToken()) {
             auto pObject = stckObjects.top().first;
             bool& bIsContinuation = stckObjects.top().second;
 

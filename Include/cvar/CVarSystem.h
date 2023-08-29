@@ -39,6 +39,10 @@ namespace CVar {
                 m_root = std::move(unserializer.Get());
             }
 
+            inline auto& GetRoot() {
+                return m_root;
+            }
+
             inline Value* GetValue(const std::string& _key) {
                 Value* pDesc = _FindNode(_key);
                 if (pDesc)

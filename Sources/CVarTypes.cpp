@@ -49,7 +49,8 @@ namespace CVar {
 
 				if (it != (_list.End() - 1))
 					_stream << ", ";
-				else _stream << ']';
+				else 
+                    _stream << ']';
 			}
 
 			stckList.pop();
