@@ -7,6 +7,7 @@
 
 #include <cvar/Api.h>
 #include <cvar/ISerializer.h>
+#include <optional>
 #include <limits>
 #include <queue>
 #include <stack>
@@ -17,18 +18,19 @@ namespace CVar {
 
     struct JSONToken {
         JSONToken() = default;
-        JSONToken(const std::variant<char, String, Float, Int, Bool, JSONNull>& _token, uint32_t _uLine) :
+        JSONToken(const std::variant<std::monostate, char, String, Float, Int, Bool, JSONNull>& _token, uint32_t _uLine) :
             token(_token),
             uLine(_uLine) {}
 
-        std::variant<char, String, Float, Int, Bool, JSONNull> token;
+        std::variant<std::monostate, char, String, Float, Int, Bool, JSONNull> token;
         uint32_t uLine = 1;
     };
 
     // for streaming variants
-    std::ostream& operator<<(std::ostream& _stream, std::variant<char, String, Float, Int, Bool, JSONNull>& _token);
+    std::ostream& operator<<(std::ostream& _stream, std::variant<std::monostate, char, String, Float, Int, Bool, JSONNull>& _token);
 
     enum JSONTokenIndex {
+        JSONTokenIndex_Unknown,
         JSONTokenIndex_Char,
         JSONTokenIndex_String,
         JSONTokenIndex_Float,
@@ -39,27 +41,33 @@ namespace CVar {
 
     class CVAR_API JSONUnserializer : public IUnserializer {
         private:
-            std::queue<JSONToken> m_qTokens;
+            JSONToken m_token = JSONToken(std::monostate{}, 1);
             const char m_szJsonSyntax[8] = { '{', '}', '[', ']', ',', ':', '\"', '\'' };
             const char m_szJsonWhitespace[4] = { ' ', '\n', '\r', '\t' };
             uint32_t m_uLineCounter = 1;
 
         private:
-            std::variant<std::monostate, String> _LexString();
-            std::variant<std::monostate, Int> _LexInt();
-            std::variant<std::monostate, Float> _LexFloat();
-            std::variant<std::monostate, Bool> _LexBool();
-            std::variant<std::monostate, JSONNull> _LexNull();
+            std::optional<String> _TokenizeString();
+            std::optional<Int> _TokenizeInt();
+            std::optional<Float> _TokenizeFloat();
+            std::optional<Bool> _TokenizeBool();
+            std::optional<JSONNull> _TokenizeNull();
 
+            // little utility function to search for a character in char array filter
             bool _Contains(char _c, const char* _szFilter, size_t _uSize);
 
-            void _Lex();
+            // poll a next token
+            bool _NextToken();
+            void _NextTokenEx();
 
-            inline bool _EofError() {
-                if (m_qTokens.empty()) {
-                    m_errStream << "Unexpected EOF";
+            template <typename T>
+            bool _TryValueTokenization(const std::optional<T>& _jsonValue) {
+                if (_jsonValue.has_value()) {
+                    m_token.token = _jsonValue.value();
+                    m_token.uLine = m_uLineCounter;
                     return true;
                 }
+
                 return false;
             }
 
@@ -68,6 +76,6 @@ namespace CVar {
             void _Parse();
 
         public:
-            JSONUnserializer(std::istream& _stream, std::ostream& _errStream = std::cerr);
+            JSONUnserializer(std::istream& _stream);
     };
 }

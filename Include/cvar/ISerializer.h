@@ -7,6 +7,7 @@
 
 #include <cvar/Api.h>
 #include <cvar/CVarTypes.h>
+#include <exception>
 #include <ostream>
 #include <iostream>
 #include <unordered_map>
@@ -29,16 +30,42 @@ namespace CVar {
     class CVAR_API IUnserializer {
         protected:
             std::istream& m_stream;
-            std::ostream& m_errStream;
             std::unordered_map<String, Value> m_root;
 
         public:
-            IUnserializer(std::istream& _stream, std::ostream& _errStream) :
-                m_stream(_stream),
-                m_errStream(_errStream) {}
+            IUnserializer(std::istream& _stream) :
+                m_stream(_stream) {}
 
             inline std::unordered_map<String, Value>&& Get() {
                 return std::move(m_root);
+            }
+    };
+
+
+    class SyntaxErrorException : public std::exception {
+        private:
+            std::string m_sWhatMessage;
+
+        public:
+            SyntaxErrorException(const std::string& _sWhat = "Unknown exception") :
+                m_sWhatMessage(_sWhat) {}
+
+            const char* what() const noexcept override {
+                return m_sWhatMessage.c_str();
+            }
+    };
+
+
+    class UnexpectedEOFException : public std::exception {
+        private:
+            std::string m_sWhatMessage;
+
+        public:
+            UnexpectedEOFException(const std::string& _sWhat = "Unknown exception") :
+                m_sWhatMessage(_sWhat) {}
+
+            const char* what() const noexcept override {
+                return m_sWhatMessage.c_str();
             }
     };
 }

@@ -14,7 +14,15 @@ int main(int argc, char* argv[]) {
         std::cout << "Usage: Parse <file>\n";
 
     CVar::CVarSystem& cvarSyst = CVar::CVarSystem::GetInstance();
-    cvarSyst.Unserialize<CVar::JSONUnserializer>(argv[1]);
+    try {
+        cvarSyst.Unserialize<CVar::JSONUnserializer>(argv[1]);
+    }
+    catch (const CVar::SyntaxErrorException& e) {
+        std::cerr << "[SyntaxErrorException] " << e.what() << '\n';
+    }
+    catch (const CVar::UnexpectedEOFException& e) {
+        std::cerr << "[UnexpectedEOFException] " << e.what() << '\n';
+    }
     cvarSyst.Serialize<CVar::JSONSerializer>(std::string(argv[1]) + ".copy");
     return 0;
 }
