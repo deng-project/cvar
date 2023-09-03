@@ -16,6 +16,7 @@ option(CVAR_STATIC "Build CVar systems library as static library" ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/libcvar.cmake)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/cvar)
 
 if (CVAR_BUILD_DEMOS)
     message(STATUS "Adding demo build configurations")

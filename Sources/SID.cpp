@@ -15,6 +15,15 @@ namespace CVar {
 
 		return uHash ^ 0xffffffff;
 	}
+
+    uint32_t RuntimeCrc32(const char* _szData) {
+        uint32_t uHash = 0;
+        for (size_t i = 0; i < std::strlen(_szData); i++) {
+            uHash = (uHash >> 8) ^ crc32_table[(uHash ^ _szData[i]) & 0xff];
+        }
+
+        return uHash ^ 0xffffffff;
+    }
     #elif defined (ENV64)
 	uint64_t RuntimeCrc64(const std::string& _str) {
 		uint64_t uHash = 0;
@@ -24,5 +33,14 @@ namespace CVar {
 
 		return uHash ^ 0xffffffffffffffff;
 	}
+
+    uint64_t RuntimeCrc64(const char* _szData) {
+        uint64_t uHash = 0;
+        for (size_t i = 0; i < std::strlen(_szData); i++) {
+            uHash = (uHash >> 8) ^ crc64_table[(uHash ^ _szData[i]) & 0xff];
+        }
+
+        return uHash ^ 0xffffffffffffffff;
+    }
     #endif
 }

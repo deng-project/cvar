@@ -117,6 +117,7 @@ namespace CVar {
     }
 
     uint32_t RuntimeCrc32(const std::string& _str);
+    uint32_t RuntimeCrc32(const char* _szData);
 
     #define SID(x) (DENG::crc32<sizeof(x) - 2>(x) ^ 0xffffffff)
     #define RUNTIME_CRC(x) RuntimeCrc32(x)
@@ -200,6 +201,7 @@ namespace CVar {
     }
 
     uint64_t RuntimeCrc64(const std::string& _str);
+    uint64_t RuntimeCrc64(const char* _szData);
 
     #define CONSTEXPR_SID(x) (CVar::crc64<sizeof(x) - 2>(x) ^ 0xffffffffffffffff)
     #define RUNTIME_CRC(x) CVar::RuntimeCrc64(x)
