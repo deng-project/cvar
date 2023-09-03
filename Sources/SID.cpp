@@ -3,6 +3,7 @@
 // file: SID.h - Runtime string hashing implementation
 // author: Karl-Mihkel Ott
 
+#include <cstring>
 #include <cvar/SID.h>
 
 namespace CVar {
