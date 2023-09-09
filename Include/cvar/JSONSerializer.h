@@ -10,7 +10,7 @@
 
 namespace CVar {
 
-    class CVAR_API JSONSerializer : public ISerializer {
+    class CVAR_API JSONSerializer : public ISerializer<std::unordered_map<String, Value>> {
         private:
             void _SerializeBeautified();
             void _SerializeCompact();

@@ -13,20 +13,22 @@
 #include <unordered_map>
 
 namespace CVar {
-
+    
+    template <typename T>
     class CVAR_API ISerializer {
         protected:
             std::ostream& m_stream;
-            std::unordered_map<String, Value>& m_root;
+            T& m_root;
 
         public:
-            ISerializer(std::ostream& _stream, std::unordered_map<String, Value>& _root) :
+            ISerializer(std::ostream& _stream, T& _root) :
                 m_stream(_stream),
                 m_root(_root) {}
             virtual void Serialize(bool bBeautified = true) = 0;
     };
 
 
+    template <typename T>
     class CVAR_API IUnserializer {
         protected:
             std::istream& m_stream;
@@ -36,7 +38,7 @@ namespace CVar {
             IUnserializer(std::istream& _stream) :
                 m_stream(_stream) {}
 
-            inline std::unordered_map<String, Value>&& Get() {
+            inline T&& Get() {
                 return std::move(m_root);
             }
     };

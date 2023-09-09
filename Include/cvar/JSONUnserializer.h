@@ -39,7 +39,7 @@ namespace CVar {
         JSONTokenIndex_JSONNull
     };
 
-    class CVAR_API JSONUnserializer : public IUnserializer {
+    class CVAR_API JSONUnserializer : public IUnserializer<std::unordered_map<String, Value>> {
         private:
             JSONToken m_token = JSONToken(std::monostate{}, 1);
             const char m_szJsonSyntax[8] = { '{', '}', '[', ']', ',', ':', '\"', '\'' };
