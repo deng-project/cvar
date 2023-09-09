@@ -51,100 +51,6 @@ namespace CVar {
     }
 
 
-    std::optional<String> JSONUnserializer::_TokenizeString() {
-        std::optional<String> jsonString = std::nullopt;
-        char cQuot = m_stream.peek();
-
-        if (cQuot == '"' || cQuot == '\'') {
-            static_cast<void>(m_stream.get());
-            std::string jsonStdString;
-
-            while(m_stream.peek() != -1 && m_stream.peek() != cQuot)
-                jsonStdString += m_stream.get();
-
-            jsonString = String(jsonStdString);
-
-            if (!m_stream.eof())
-                static_cast<void>(m_stream.get());
-        }
-
-        return jsonString;
-    }
-
-
-    std::optional<Int> JSONUnserializer::_TokenizeInt() {
-        std::optional<Int> jsonInt = std::nullopt;
-        
-        std::string sJsonInt;
-        size_t uReverseBytes = 0;
-        while (m_stream.peek() != -1 && ((m_stream.peek() <= '9' && m_stream.peek() >= '0') || m_stream.peek() == '-')) {
-            sJsonInt += m_stream.get();
-            uReverseBytes++;
-        }
-
-        if (m_stream.peek() != '.' && !sJsonInt.empty())
-            jsonInt = static_cast<Int>(std::stoi(sJsonInt));
-        else {
-            for (size_t i = 0; i < uReverseBytes; i++)
-                m_stream.unget();
-        }
-
-        return jsonInt;
-    }
-
-
-    std::optional<Float> JSONUnserializer::_TokenizeFloat() {
-        std::optional<Float> jsonFloat = {};
-
-        std::string sJsonFloat;
-
-        size_t uReverseBytes = 0;
-        while (m_stream.peek() != -1 && ((m_stream.peek() <= '9' && m_stream.peek() >= '0') || m_stream.peek() == '.' || m_stream.peek() == '-')) {
-            sJsonFloat += m_stream.get();
-            uReverseBytes++;
-        }
-
-        if (!sJsonFloat.empty())
-            jsonFloat = static_cast<Float>(std::stof(sJsonFloat));
-        else {
-            for (size_t i = 0; i < uReverseBytes; i++)
-                m_stream.unget();
-        }
-
-        return jsonFloat;
-    }
-
-
-    std::optional<Bool> JSONUnserializer::_TokenizeBool() {
-        char buf[sizeof("false")] = {};
-
-        // true
-        size_t i = 0;
-        for (i = 0; i < sizeof("true")-1 && m_stream.peek() != -1; i++)
-            buf[i] = static_cast<char>(m_stream.get());
-
-        if (!std::strcmp(buf, "true"))
-            return true;
-
-        for (size_t j = 0; j < i; j++)
-            m_stream.unget();
-        m_stream.clear();
-
-        // false
-        for (i = 0; i < sizeof("false")-1 && m_stream.peek() != -1; i++)
-            buf[i] = static_cast<char>(m_stream.get());
-
-        if (!std::strcmp(buf, "false"))
-            return false;
-
-        for (size_t j = 0; j < i; j++)
-            m_stream.unget();
-        m_stream.clear();
-
-        return std::nullopt;
-    }
-
-
     std::optional<JSONNull> JSONUnserializer::_TokenizeNull() {
         char buf[sizeof("null")] = {};
 
@@ -160,14 +66,6 @@ namespace CVar {
         m_stream.clear();
 
         return std::nullopt;
-    }
-
-
-    bool JSONUnserializer::_Contains(char _c, const char* _szFilter, size_t _uSize) {
-        for (size_t i = 0; i < _uSize; i++)
-            if (_szFilter[i] == _c) return true;
-
-        return false;
     }
 
 
@@ -187,7 +85,7 @@ namespace CVar {
         if (m_stream.peek() == -1)
             return false;
 
-        if (_TryValueTokenization(_TokenizeString()) || _TryValueTokenization(_TokenizeInt()) ||
+        if (_TryValueTokenization(_TokenizeString<String>()) || _TryValueTokenization(_TokenizeInt()) ||
             _TryValueTokenization(_TokenizeFloat()) || _TryValueTokenization(_TokenizeBool()) ||
             _TryValueTokenization(_TokenizeNull())) 
         {

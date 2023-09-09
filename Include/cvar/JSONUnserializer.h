@@ -47,18 +47,11 @@ namespace CVar {
             uint32_t m_uLineCounter = 1;
 
         private:
-            std::optional<String> _TokenizeString();
-            std::optional<Int> _TokenizeInt();
-            std::optional<Float> _TokenizeFloat();
-            std::optional<Bool> _TokenizeBool();
-            std::optional<JSONNull> _TokenizeNull();
-
-            // little utility function to search for a character in char array filter
-            bool _Contains(char _c, const char* _szFilter, size_t _uSize);
-
             // poll a next token
             bool _NextToken();
             void _NextTokenEx();
+
+            std::optional<JSONNull> _TokenizeNull();
 
             template <typename T>
             bool _TryValueTokenization(const std::optional<T>& _jsonValue) {
