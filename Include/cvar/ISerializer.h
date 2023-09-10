@@ -34,7 +34,7 @@ namespace CVar {
     class CVAR_API IUnserializer {
         protected:
             std::istream& m_stream;
-            std::unordered_map<String, Value> m_root;
+            T m_root;
 
         protected:
             template <typename U>
