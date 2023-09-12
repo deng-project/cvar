@@ -31,19 +31,19 @@ $ make -j9000
 Manipulating and accessing console variables can be done by using `CVarSystem` API.  
 Setting variables is pretty straight forward:
 ```c++
-CVar::CVarSystem& cvarSyst = CVar::CVarSystem::GetInstance();
-cvarSyst.Set<CVar::String>("myVariable.myObject.myString", "Hello world!");
-cvarSyst.Set<CVar::Bool>("myVariable.myObject.myBool", false);
-cvarSyst.Set<CVar::Int>("myVariable.myObject.myInt", 420);
-cvarSyst.Set<CVar::Float>("myVariable.myObject.myFloat", 6.9);
-cvarSyst.Set<CVar::List>("myVariable.myObject.myList", {1, 2.01f, false, "Hello"});
+cvar::CVarSystem& cvarSyst = cvar::CVarSystem::GetInstance();
+cvarSyst.Set<cvar::String>("myVariable.myObject.myString", "Hello world!");
+cvarSyst.Set<cvar::Bool>("myVariable.myObject.myBool", false);
+cvarSyst.Set<cvar::Int>("myVariable.myObject.myInt", 420);
+cvarSyst.Set<cvar::Float>("myVariable.myObject.myFloat", 6.9);
+cvarSyst.Set<cvar::List>("myVariable.myObject.myList", {1, 2.01f, false, "Hello"});
 ```
 
 For accessing variables, however, there are two ways it can be done. The first way is to use 
 `CVarSystem::Get<T>()`. This method expects the variable to have specified data type T.  
 From the previous example:  
 ```c++
-CVar::String* pString = cvarSyst.Get<CVar::String>("myVariable.myObject.myString");
+cvar::String* pString = cvarSyst.Get<cvar::String>("myVariable.myObject.myString");
 if (pString)
     std::cout << *pString << std::endl;
 ```

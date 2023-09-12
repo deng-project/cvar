@@ -64,8 +64,8 @@ namespace cvar {
 
 // HACK: create std::hash<String> definitions so that the hash wouldn't get calculated
 template <>
-struct std::hash<CVar::String> {
-    inline std::size_t operator()(const CVar::String& _str) const {
+struct std::hash<cvar::String> {
+    inline std::size_t operator()(const cvar::String& _str) const {
         return _str.GetHash();
     }
 };

@@ -31,24 +31,24 @@ void TrimString(string& _str) {
 }
 
 // for now only primitive types are supported
-CVar::Type DetectValueType(const std::string _sValue) {
+cvar::Type DetectValueType(const std::string _sValue) {
     if ((_sValue.front() == '"' && _sValue.back() == '"') ||
         (_sValue.front() == '\'' && _sValue.back() == '\''))
-        return CVar::Type_String;
+        return cvar::Type_String;
     else if (_sValue == "true" || _sValue == "false") {
-        return CVar::Type_Bool;
+        return cvar::Type_Bool;
     } 
     else {
         bool bInt = true;
         for (size_t i = 0; i < _sValue.size(); i++) {
             if (_sValue[i] < '0' && _sValue[i] > '9' && _sValue[i] != '.')
-                return CVar::Type_None;
+                return cvar::Type_None;
             else if (_sValue[i] == '.')
                 bInt = false;
         }
 
-        if (bInt) return CVar::Type_Int;
-        else return CVar::Type_Float;
+        if (bInt) return cvar::Type_Int;
+        else return cvar::Type_Float;
     }
 }
 
@@ -62,23 +62,23 @@ void Set(const string& _sLine) {
     TrimString(sValue);
 
     auto type = DetectValueType(sValue);
-    CVar::CVarSystem& cvarSyst = CVar::CVarSystem::GetInstance();
+    cvar::CVarSystem& cvarSyst = cvar::CVarSystem::GetInstance();
 
     switch (type) {
-        case CVar::Type_String:
-            cvarSyst.Set<CVar::String>(sVarName, sValue.substr(1, sValue.size()-2));
+        case cvar::Type_String:
+            cvarSyst.Set<cvar::String>(sVarName, sValue.substr(1, sValue.size()-2));
             break;
 
-        case CVar::Type_Bool:
-            cvarSyst.Set<CVar::Bool>(sVarName, (sValue == "true" ? true : false));
+        case cvar::Type_Bool:
+            cvarSyst.Set<cvar::Bool>(sVarName, (sValue == "true" ? true : false));
             break;
 
-        case CVar::Type_Int:
-            cvarSyst.Set<CVar::Int>(sVarName, static_cast<CVar::Int>(std::stoi(sValue)));
+        case cvar::Type_Int:
+            cvarSyst.Set<cvar::Int>(sVarName, static_cast<cvar::Int>(std::stoi(sValue)));
             break;
 
-        case CVar::Type_Float:
-            cvarSyst.Set<CVar::Float>(sVarName, static_cast<CVar::Float>(std::stof(sValue)));
+        case cvar::Type_Float:
+            cvarSyst.Set<cvar::Float>(sVarName, static_cast<cvar::Float>(std::stof(sValue)));
             break;
 
         default:
@@ -89,37 +89,37 @@ void Set(const string& _sLine) {
 
 
 string Get(const string& _sLine) {
-    CVar::CVarSystem& cvarSyst = CVar::CVarSystem::GetInstance();
+    cvar::CVarSystem& cvarSyst = cvar::CVarSystem::GetInstance();
 
-    CVar::Value* pValue = cvarSyst.GetValue(_sLine);
+    cvar::Value* pValue = cvarSyst.GetValue(_sLine);
     stringstream ss;
     if (!pValue) 
         ss << "Invalid variable '" << _sLine << "'";
     else {
         switch (pValue->index()) {
-            case CVar::Type_Int:
-                ss << std::get<CVar::Type_Int>(*pValue);
+            case cvar::Type_Int:
+                ss << std::get<cvar::Type_Int>(*pValue);
                 break;
 
-            case CVar::Type_Float:
-                ss << std::get<CVar::Type_Float>(*pValue);
+            case cvar::Type_Float:
+                ss << std::get<cvar::Type_Float>(*pValue);
                 break;
 
-            case CVar::Type_Bool:
-                ss << (std::get<CVar::Type_Bool>(*pValue) ? "true" : "false");
+            case cvar::Type_Bool:
+                ss << (std::get<cvar::Type_Bool>(*pValue) ? "true" : "false");
                 break;
             
-            case CVar::Type_String:
-                ss << std::get<CVar::Type_String>(*pValue);
+            case cvar::Type_String:
+                ss << std::get<cvar::Type_String>(*pValue);
                 break;
 
-            case CVar::Type_List:
-                ss << std::get<CVar::Type_List>(*pValue);
+            case cvar::Type_List:
+                ss << std::get<cvar::Type_List>(*pValue);
                 break;
 
-            case CVar::Type_Object:
+            case cvar::Type_Object:
                 {
-                    auto pObject = std::get<CVar::Type_Object>(*pValue);
+                    auto pObject = std::get<cvar::Type_Object>(*pValue);
                     ss << *(pObject.get());
                 }
                 break;
@@ -146,13 +146,13 @@ void Cmd(const string& _sLine) {
         return;
     } else if (words[1] == "save") {
         if (words[2] == "json") {
-            CVar::CVarSystem& cvarSyst = CVar::CVarSystem::GetInstance();
+            cvar::CVarSystem& cvarSyst = cvar::CVarSystem::GetInstance();
 
             // check if minified json should be used
             if (words.size() == 5 && words.back() == "min") {
-                cvarSyst.Serialize<CVar::JSONSerializer>(words[3], false);
+                cvarSyst.Serialize<cvar::JSONSerializer>(words[3], false);
             } else {
-                cvarSyst.Serialize<CVar::JSONSerializer>(words[3], true);
+                cvarSyst.Serialize<cvar::JSONSerializer>(words[3], true);
             }
             cout << "Serialized to '" << words[2] << "'\n";
         } else if (words[2] == "yaml") {

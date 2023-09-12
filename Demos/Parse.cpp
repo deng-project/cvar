@@ -13,18 +13,18 @@ int main(int argc, char* argv[]) {
     if (argc < 2)
         std::cout << "Usage: Parse <file>\n";
 
-    CVar::CVarSystem& cvarSyst = CVar::CVarSystem::GetInstance();
+    cvar::CVarSystem& cvarSyst = cvar::CVarSystem::GetInstance();
     try {
-        cvarSyst.Unserialize<CVar::JSONUnserializer>(argv[1]);
+        cvarSyst.Unserialize<cvar::JSONUnserializer>(argv[1]);
     }
-    catch (const CVar::SyntaxErrorException& e) {
+    catch (const cvar::SyntaxErrorException& e) {
         std::cerr << "[SyntaxErrorException] " << e.what() << '\n';
     }
-    catch (const CVar::UnexpectedEOFException& e) {
+    catch (const cvar::UnexpectedEOFException& e) {
         std::cerr << "[UnexpectedEOFException] " << e.what() << '\n';
     }
 
-    CVar::JSONSerializer serializer(std::cout, cvarSyst.GetRoot());
+    cvar::JSONSerializer serializer(std::cout, cvarSyst.GetRoot());
     serializer.Serialize();
     return 0;
 }

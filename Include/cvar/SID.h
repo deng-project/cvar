@@ -203,8 +203,8 @@ namespace cvar {
     uint64_t RuntimeCrc64(const std::string& _str);
     uint64_t RuntimeCrc64(const char* _szData);
 
-    #define CONSTEXPR_SID(x) (CVar::crc64<sizeof(x) - 2>(x) ^ 0xffffffffffffffff)
-    #define RUNTIME_CRC(x) CVar::RuntimeCrc64(x)
+    #define CONSTEXPR_SID(x) (cvar::crc64<sizeof(x) - 2>(x) ^ 0xffffffffffffffff)
+    #define RUNTIME_CRC(x) cvar::RuntimeCrc64(x)
 #endif
     
     #define SID(x) COMPILE_TIME(CONSTEXPR_SID(x))
