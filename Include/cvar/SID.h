@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <cstddef>
 #include <string>
-#include <cvar/Api.h>
 
 #if _WIN32 || _WIN64
     #if _WIN64
@@ -26,7 +25,7 @@
     #endif
 #endif
 
-namespace CVar {
+namespace cvar {
         // HACK: force constexpr crc64 result to be evaluated at compile time
     template<typename T, T val>
     struct ForceCompileTime {
@@ -117,8 +116,8 @@ namespace CVar {
         return 0xffffffff;
     }
 
-    CVAR_API uint32_t RuntimeCrc32(const std::string& _str);
-    CVAR_API uint32_t RuntimeCrc32(const char* const _szData);
+    uint32_t RuntimeCrc32(const std::string& _str);
+    uint32_t RuntimeCrc32(const char* _szData);
 
     #define SID(x) (DENG::crc32<sizeof(x) - 2>(x) ^ 0xffffffff)
     #define RUNTIME_CRC(x) RuntimeCrc32(x)
@@ -201,8 +200,8 @@ namespace CVar {
         return 0xffffffffffffffff;
     }
 
-    CVAR_API uint64_t RuntimeCrc64(const std::string& _str);
-    CVAR_API uint64_t RuntimeCrc64(const char* const _szData);
+    uint64_t RuntimeCrc64(const std::string& _str);
+    uint64_t RuntimeCrc64(const char* _szData);
 
     #define CONSTEXPR_SID(x) (CVar::crc64<sizeof(x) - 2>(x) ^ 0xffffffffffffffff)
     #define RUNTIME_CRC(x) CVar::RuntimeCrc64(x)

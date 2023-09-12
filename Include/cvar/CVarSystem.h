@@ -9,7 +9,7 @@
 #include <cvar/CVarTypes.h>
 #include <fstream>
 
-namespace CVar {
+namespace cvar {
 
     class CVAR_API CVarSystem {
         private:

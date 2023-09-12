@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <iomanip>
 
-namespace CVar {
+namespace cvar {
 
     JSONSerializer::JSONSerializer(std::ostream& _stream, std::unordered_map<String, Value>& _root) :
         ISerializer(_stream, _root) {}

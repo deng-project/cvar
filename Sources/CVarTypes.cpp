@@ -7,7 +7,7 @@
 #include <ostream>
 #include <cvar/CVarTypes.h>
 
-namespace CVar {
+namespace cvar {
     std::ostream& operator<<(std::ostream& _stream, List& _list) {
         std::stack<List*> stckList;
 		stckList.push(&_list);

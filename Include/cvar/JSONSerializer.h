@@ -8,7 +8,7 @@
 #include <cvar/Api.h>
 #include <cvar/ISerializer.h>
 
-namespace CVar {
+namespace cvar {
 
     class CVAR_API JSONSerializer : public ISerializer<std::unordered_map<String, Value>> {
         private:

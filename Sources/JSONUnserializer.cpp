@@ -8,7 +8,7 @@
 #include <sstream>
 #include <cvar/JSONUnserializer.h>
 
-namespace CVar {
+namespace cvar {
 
     std::ostream& operator<<(std::ostream& _stream, std::variant<std::monostate, char, String, Float, Int, Bool, JSONNull>& _token) {
         switch (_token.index()) {

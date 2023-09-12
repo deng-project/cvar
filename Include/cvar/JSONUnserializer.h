@@ -12,7 +12,7 @@
 #include <queue>
 #include <stack>
 
-namespace CVar {
+namespace cvar {
 
     struct JSONNull {};
 

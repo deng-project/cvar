@@ -12,7 +12,7 @@
 #include <memory>
 #include <cvar/SID.h>
 
-namespace CVar {
+namespace cvar {
 
     class String {
         private:
@@ -70,7 +70,7 @@ struct std::hash<CVar::String> {
     }
 };
 
-namespace CVar {
+namespace cvar {
     typedef int32_t Int;
     typedef float Float;
     typedef bool Bool;

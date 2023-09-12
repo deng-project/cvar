@@ -6,7 +6,7 @@
 #include <cvar/CVarSystem.h>
 #include <queue>
 
-namespace CVar {
+namespace cvar {
 
     std::vector<String> CVarSystem::_HashKeyWords(const std::string& _key) {
 		std::queue<std::string> qKeyWords;

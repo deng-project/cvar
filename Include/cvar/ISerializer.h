@@ -14,7 +14,7 @@
 #include <optional>
 #include <unordered_map>
 
-namespace CVar {
+namespace cvar {
     
     template <typename T>
     class CVAR_API ISerializer {
@@ -34,7 +34,7 @@ namespace CVar {
     class CVAR_API IUnserializer {
         protected:
             std::istream& m_stream;
-            T m_root;
+            std::unordered_map<String, Value> m_root;
 
         protected:
             template <typename U>
