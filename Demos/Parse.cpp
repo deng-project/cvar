@@ -6,6 +6,7 @@
 #include <cvar/JSONUnserializer.h>
 #include <cvar/JSONSerializer.h>
 #include <cvar/CVarSystem.h>
+#include <cvar/SerializerExceptions.h>
 #include <iostream>
 #include <fstream>
 

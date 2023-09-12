@@ -7,10 +7,8 @@
 
 #include <cvar/Api.h>
 #include <cvar/CVarTypes.h>
-#include <exception>
 #include <cstring>
-#include <ostream>
-#include <iostream>
+#include <istream>
 #include <optional>
 #include <unordered_map>
 
@@ -34,7 +32,23 @@ namespace cvar {
     class CVAR_API IUnserializer {
         protected:
             std::istream& m_stream;
-            std::unordered_map<String, Value> m_root;
+            T m_root;
+
+        public:
+            IUnserializer(std::istream& _stream) :
+                m_stream(_stream) {}
+
+            inline T&& Get() {
+                return std::move(m_root);
+            }
+    };
+
+
+    template<typename T>
+    class CVAR_API IPlainTextUnserializer : public IUnserializer<T> {
+        public:
+            IPlainTextUnserializer(std::istream& _stream) :
+                IUnserializer<T>(_stream) {}
 
         protected:
             template <typename U>
@@ -43,21 +57,21 @@ namespace cvar {
                 std::string stdStr;
 
                 if (_bExpectQuot) {
-                    char cQuot = static_cast<char>(m_stream.peek());
+                    char cQuot = static_cast<char>(this->m_stream.peek());
                     if (cQuot == '"' || cQuot == '\'') {
-                        static_cast<void>(m_stream.get());
+                        static_cast<void>(this->m_stream.get());
 
-                        while (m_stream.peek() != -1 && m_stream.peek() != cQuot)
-                            stdStr += static_cast<char>(m_stream.get());
+                        while (this->m_stream.peek() != -1 && this->m_stream.peek() != cQuot)
+                            stdStr += static_cast<char>(this->m_stream.get());
 
                         str = U(stdStr);
 
-                        if (!m_stream.eof())
-                            static_cast<void>(m_stream.get());
+                        if (!this->m_stream.eof())
+                            static_cast<void>(this->m_stream.get());
                     }
                 } else {
-                    while (m_stream.peek() != -1 && !_Contains(m_stream.peek(), " \t\n\r", 4))
-                        stdStr += static_cast<char>(m_stream.get());
+                    while (this->m_stream.peek() != -1 && !_Contains(this->m_stream.peek(), " \t\n\r", 4))
+                        stdStr += static_cast<char>(this->m_stream.get());
 
                     str = U(stdStr);
                 }
@@ -70,16 +84,16 @@ namespace cvar {
                 std::string sInt;
 
                 size_t uReverseBytes = 0;
-                while (m_stream.peek() != -1 && ((m_stream.peek() <= '9' && m_stream.peek() >= '0') || m_stream.peek() == '-')) {
-                    sInt += static_cast<char>(m_stream.get());
+                while (this->m_stream.peek() != -1 && ((this->m_stream.peek() <= '9' && this->m_stream.peek() >= '0') || this->m_stream.peek() == '-')) {
+                    sInt += static_cast<char>(this->m_stream.get());
                     uReverseBytes++;
                 }
 
-                if (m_stream.peek() != '.' && !sInt.empty())
+                if (this->m_stream.peek() != '.' && !sInt.empty())
                     iVal = static_cast<Int>(std::stoi(sInt));
                 else {
                     for (size_t i = 0; i < uReverseBytes; i++)
-                        m_stream.unget();
+                        this->m_stream.unget();
                 }
 
                 return iVal;
@@ -90,8 +104,8 @@ namespace cvar {
             
                 std::string sFloat;
                 size_t uReverseBytes = 0;
-                while (m_stream.peek() != -1 && _Contains(m_stream.peek(), "123456789e-.", 12)) {
-                    sFloat += static_cast<char>(m_stream.get());
+                while (this->m_stream.peek() != -1 && _Contains(this->m_stream.peek(), "123456789e-.", 12)) {
+                    sFloat += static_cast<char>(this->m_stream.get());
                     uReverseBytes++;
                 }
 
@@ -99,7 +113,7 @@ namespace cvar {
                     fVal = static_cast<Float>(std::stof(sFloat));
                 else {
                     for (size_t i = 0; i < uReverseBytes; i++)
-                        m_stream.unget();
+                        this->m_stream.unget();
                 }
 
                 return fVal;
@@ -110,26 +124,26 @@ namespace cvar {
 
                 // true
                 size_t i = 0;
-                for (i = 0; i < sizeof("true")-1 && m_stream.peek() != -1; i++)
-                    buf[i] = static_cast<char>(m_stream.get());
+                for (i = 0; i < sizeof("true")-1 && this->m_stream.peek() != -1; i++)
+                    buf[i] = static_cast<char>(this->m_stream.get());
 
                 if (!std::strcmp(buf, "true"))
                     return true;
 
                 for (size_t j = 0; j < i; j++)
-                    m_stream.unget();
-                m_stream.clear();
+                    this->m_stream.unget();
+                this->m_stream.clear();
 
                 // false
-                for (i = 0; i < sizeof("false")-1 && m_stream.peek() != -1; i++)
-                    buf[i] = static_cast<char>(m_stream.get());
+                for (i = 0; i < sizeof("false")-1 && this->m_stream.peek() != -1; i++)
+                    buf[i] = static_cast<char>(this->m_stream.get());
 
                 if (!std::strcmp(buf, "false"))
                     return false;
 
                 for (size_t j = 0; j < i; j++)
-                    m_stream.unget();
-                m_stream.clear();
+                    this->m_stream.unget();
+                this->m_stream.clear();
 
                 return std::nullopt;
             }
@@ -140,42 +154,6 @@ namespace cvar {
                 }
 
                 return false;
-            }
-
-        public:
-            IUnserializer(std::istream& _stream) :
-                m_stream(_stream) {}
-
-            inline T&& Get() {
-                return std::move(m_root);
-            }
-    };
-
-
-    class SyntaxErrorException : public std::exception {
-        private:
-            std::string m_sWhatMessage;
-
-        public:
-            SyntaxErrorException(const std::string& _sWhat = "Unknown exception") :
-                m_sWhatMessage(_sWhat) {}
-
-            const char* what() const noexcept override {
-                return m_sWhatMessage.c_str();
-            }
-    };
-
-
-    class UnexpectedEOFException : public std::exception {
-        private:
-            std::string m_sWhatMessage;
-
-        public:
-            UnexpectedEOFException(const std::string& _sWhat = "Unknown exception") :
-                m_sWhatMessage(_sWhat) {}
-
-            const char* what() const noexcept override {
-                return m_sWhatMessage.c_str();
             }
     };
 }

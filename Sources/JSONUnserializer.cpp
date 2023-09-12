@@ -7,6 +7,7 @@
 #include <cstring>
 #include <sstream>
 #include <cvar/JSONUnserializer.h>
+#include <cvar/SerializerExceptions.h>
 
 namespace cvar {
 
@@ -45,7 +46,7 @@ namespace cvar {
 
     
     JSONUnserializer::JSONUnserializer(std::istream& _stream) :
-        IUnserializer(_stream)
+        IPlainTextUnserializer<std::unordered_map<String, Value>>(_stream)
     {
         _Parse();
     }
