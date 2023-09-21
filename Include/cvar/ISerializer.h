@@ -70,8 +70,11 @@ namespace cvar {
                             static_cast<void>(this->m_stream.get());
                     }
                 } else {
-                    while (this->m_stream.peek() != -1 && !_Contains(this->m_stream.peek(), " \t\n\r", 4))
+                    char cPeek = static_cast<char>(this->m_stream.peek());
+                    while (cPeek != -1 && !_Contains(cPeek, " \t\n\r", 4)) {
                         stdStr += static_cast<char>(this->m_stream.get());
+                        cPeek = static_cast<char>(this->m_stream.peek());
+                    }
 
                     str = U(stdStr);
                 }
@@ -79,71 +82,45 @@ namespace cvar {
                 return str;
             }
 
-            std::optional<Int> _TokenizeInt() {
-                std::optional<Int> iVal = std::nullopt;
-                std::string sInt;
-
-                size_t uReverseBytes = 0;
-                while (this->m_stream.peek() != -1 && ((this->m_stream.peek() <= '9' && this->m_stream.peek() >= '0') || this->m_stream.peek() == '-')) {
-                    sInt += static_cast<char>(this->m_stream.get());
-                    uReverseBytes++;
+            std::optional<Int> _TokenizeInt(const std::string& _str) {
+                if (_str.empty())
+                    return std::nullopt;
+                
+                bool bInvalid = false;
+                for (size_t i = 0; i < _str.size(); i++) {
+                    if ((_str[i] < '0' || _str[i] > '9') && _str[i] != '-') {
+                        bInvalid = true;
+                        break;
+                    }
                 }
 
-                if (this->m_stream.peek() != '.' && !sInt.empty())
-                    iVal = static_cast<Int>(std::stoi(sInt));
-                else {
-                    for (size_t i = 0; i < uReverseBytes; i++)
-                        this->m_stream.unget();
-                }
-
-                return iVal;
+                if (bInvalid) return std::nullopt;
+                return static_cast<Int>(std::stoi(_str));
             }
 
-            std::optional<Float> _TokenizeFloat() {
-                std::optional<Float> fVal = std::nullopt;
-            
-                std::string sFloat;
-                size_t uReverseBytes = 0;
-                while (this->m_stream.peek() != -1 && _Contains(this->m_stream.peek(), "123456789e-.", 12)) {
-                    sFloat += static_cast<char>(this->m_stream.get());
-                    uReverseBytes++;
+            std::optional<Float> _TokenizeFloat(const std::string& _str) {
+                if (_str.empty())
+                    return std::nullopt;
+
+                bool bInvalid = false;
+                for (size_t i = 0; i < _str.size(); i++) {
+                    if ((_str[i] < '0' || _str[i] > '9') && _str[i] != '.' && _str[i] != 'e' && _str[i] != '-') {
+                        bInvalid = true;
+                        break;
+                    }
                 }
 
-                if (!sFloat.empty())
-                    fVal = static_cast<Float>(std::stof(sFloat));
-                else {
-                    for (size_t i = 0; i < uReverseBytes; i++)
-                        this->m_stream.unget();
-                }
+                if (bInvalid)
+                    return std::nullopt;
 
-                return fVal;
+                return static_cast<Float>(std::stof(_str));
             }
 
-            std::optional<Bool> _TokenizeBool() {
-                char buf[sizeof("false")] = {};
-
-                // true
-                size_t i = 0;
-                for (i = 0; i < sizeof("true")-1 && this->m_stream.peek() != -1; i++)
-                    buf[i] = static_cast<char>(this->m_stream.get());
-
-                if (!std::strcmp(buf, "true"))
+            std::optional<Bool> _TokenizeBool(const std::string& _str) {
+                if (_str == "true")
                     return true;
-
-                for (size_t j = 0; j < i; j++)
-                    this->m_stream.unget();
-                this->m_stream.clear();
-
-                // false
-                for (i = 0; i < sizeof("false")-1 && this->m_stream.peek() != -1; i++)
-                    buf[i] = static_cast<char>(this->m_stream.get());
-
-                if (!std::strcmp(buf, "false"))
+                else if (_str == "false")
                     return false;
-
-                for (size_t j = 0; j < i; j++)
-                    this->m_stream.unget();
-                this->m_stream.clear();
 
                 return std::nullopt;
             }

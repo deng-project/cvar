@@ -52,20 +52,9 @@ namespace cvar {
     }
 
 
-    std::optional<JSONNull> JSONUnserializer::_TokenizeNull() {
-        char buf[sizeof("null")] = {};
-
-        size_t i = 0;
-        for (i = 0; i < sizeof("null")-1 && m_stream.peek() != -1; i++)
-            buf[i] = m_stream.get();
-
-        if (!std::strcmp(buf, "null"))
+    std::optional<JSONNull> JSONUnserializer::_TokenizeNull(const std::string& _str) {
+        if (_str == "null")
             return JSONNull{};
-
-        for (size_t j = 0; j < i; j++)
-            m_stream.unget();
-        m_stream.clear();
-
         return std::nullopt;
     }
 
@@ -77,6 +66,7 @@ namespace cvar {
         if (m_stream.peek() == -1)
             return false;
 
+        // skip json whitespaces
         while (m_stream.peek() != -1 && _Contains(m_stream.peek(), m_szJsonWhitespace, sizeof(m_szJsonWhitespace))) {
             if (static_cast<char>(m_stream.peek()) == '\n')
                 m_uLineCounter++;
@@ -86,12 +76,21 @@ namespace cvar {
         if (m_stream.peek() == -1)
             return false;
 
-        if (_TryValueTokenization(_TokenizeString<String>()) || _TryValueTokenization(_TokenizeInt()) ||
-            _TryValueTokenization(_TokenizeFloat()) || _TryValueTokenization(_TokenizeBool()) ||
-            _TryValueTokenization(_TokenizeNull())) 
+        // try reading a word
+        std::string sWord;
+        while (m_stream.peek() != -1 && !_Contains(m_stream.peek(), m_szJsonSyntax, sizeof(m_szJsonSyntax)) &&
+            !_Contains(m_stream.peek(), m_szJsonWhitespace, sizeof(m_szJsonWhitespace))) 
+        {
+            sWord += m_stream.get();
+        }
+
+        // check if string is empty, if so try string tokenisation
+        if ((sWord.empty() && _TryValueTokenization(_TokenizeString<String>())) || _TryValueTokenization(_TokenizeInt(sWord)) ||
+            _TryValueTokenization(_TokenizeFloat(sWord)) || _TryValueTokenization(_TokenizeBool(sWord)) || _TryValueTokenization(_TokenizeNull(sWord)))
         {
             return true;
         }
+
 
         if (_Contains(m_stream.peek(), m_szJsonSyntax, sizeof(m_szJsonSyntax))) {
             m_token.token = static_cast<char>(m_stream.get());

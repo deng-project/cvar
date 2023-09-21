@@ -51,7 +51,7 @@ namespace cvar {
             bool _NextToken();
             void _NextTokenEx();
 
-            std::optional<JSONNull> _TokenizeNull();
+            std::optional<JSONNull> _TokenizeNull(const std::string& _str);
 
             template <typename T>
             bool _TryValueTokenization(const std::optional<T>& _jsonValue) {

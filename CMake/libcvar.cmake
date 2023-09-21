@@ -30,6 +30,8 @@ else()
     add_library(${CVAR_TARGET} STATIC
                 ${CVAR_HEADERS}
                 ${CVAR_SOURCES})
+	target_compile_definitions(${CVAR_TARGET}
+		PUBLIC CVAR_STATIC)
 endif()
 
 target_include_directories(${CVAR_TARGET}
