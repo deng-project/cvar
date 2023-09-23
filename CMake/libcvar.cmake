@@ -6,6 +6,7 @@
 set(CVAR_TARGET cvar)
 set(CVAR_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/Include/cvar/Api.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Include/cvar/BufferedInputStream.h
     ${CMAKE_CURRENT_SOURCE_DIR}/Include/cvar/CVarSystem.h
     ${CMAKE_CURRENT_SOURCE_DIR}/Include/cvar/CVarTypes.h
     ${CMAKE_CURRENT_SOURCE_DIR}/Include/cvar/ISerializer.h

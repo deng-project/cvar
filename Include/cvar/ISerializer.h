@@ -7,6 +7,7 @@
 
 #include <cvar/Api.h>
 #include <cvar/CVarTypes.h>
+#include <cvar/BufferedInputStream.h>
 #include <cstring>
 #include <istream>
 #include <optional>
@@ -31,7 +32,7 @@ namespace cvar {
     template <typename T>
     class CVAR_API IUnserializer {
         protected:
-            std::istream& m_stream;
+            BufferedInputStream<DEFAULT_BUFFER> m_stream;
             T m_root;
 
         public:
