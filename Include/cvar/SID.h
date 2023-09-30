@@ -35,7 +35,7 @@ namespace cvar {
         };
     };
 
-    #define COMPILE_TIME(x) ((decltype(x))DENG::ForceCompileTime<decltype(x), x>::ValueHolder::VALUE)
+    #define COMPILE_TIME(x) ((decltype(x))cvar::ForceCompileTime<decltype(x), x>::ValueHolder::VALUE)
 
 #if defined(ENV32)
     static constexpr uint32_t crc32_table[256] = {
