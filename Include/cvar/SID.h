@@ -37,7 +37,6 @@ namespace cvar {
 
     #define COMPILE_TIME(x) ((decltype(x))cvar::ForceCompileTime<decltype(x), x>::ValueHolder::VALUE)
 
-#if defined(ENV32)
     static constexpr uint32_t crc32_table[256] = {
         0x00000000, 0x77073096, 0xee0e612c, 0x990951ba,
         0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
@@ -118,10 +117,16 @@ namespace cvar {
 
     uint32_t RuntimeCrc32(const std::string& _str);
     uint32_t RuntimeCrc32(const char* _szData);
+    uint32_t RuntimeCrc32(const char* _szData, size_t _uLen);
 
-    #define SID(x) (DENG::crc32<sizeof(x) - 2>(x) ^ 0xffffffff)
-    #define RUNTIME_CRC(x) RuntimeCrc32(x)
+#if defined(ENV32)
+    #define CONSTEXPR_SID(x) (cvar::crc32<sizeof(x) - 2>(x) ^ 0xffffffff)
+    #define RUNTIME_CRC(x) cvar::RuntimeCrc32(x)
 #elif defined(ENV64)
+    #define CONSTEXPR_SID(x) (cvar::crc64<sizeof(x) - 2>(x) ^ 0xffffffffffffffff)
+    #define RUNTIME_CRC(x) cvar::RuntimeCrc64(x)
+#endif
+
     static constexpr uint64_t crc64_table[256] = {
         0x0000000000000000, 0xb32e4cbe03a75f6f, 0xf4843657a840a05b, 0x47aa7ae9abe7ff34,
         0x7bd0c384ff8f5e33, 0xc8fe8f3afc28015c, 0x8f54f5d357cffe68, 0x3c7ab96d5468a107,
@@ -202,10 +207,7 @@ namespace cvar {
 
     uint64_t RuntimeCrc64(const std::string& _str);
     uint64_t RuntimeCrc64(const char* _szData);
-
-    #define CONSTEXPR_SID(x) (cvar::crc64<sizeof(x) - 2>(x) ^ 0xffffffffffffffff)
-    #define RUNTIME_CRC(x) cvar::RuntimeCrc64(x)
-#endif
+    uint64_t RuntimeCrc64(const char* _szData, size_t _uLen);
     
     #define SID(x) COMPILE_TIME(CONSTEXPR_SID(x))
     typedef std::size_t hash_t;

@@ -7,7 +7,6 @@
 #include <cvar/SID.h>
 
 namespace cvar {
-    #if defined(ENV32)
 	uint32_t RuntimeCrc32(const std::string& _str) {
 		uint32_t uHash = 0;
 		for (size_t i = 0; i < _str.size(); i++) {
@@ -25,7 +24,16 @@ namespace cvar {
 
         return uHash ^ 0xffffffff;
     }
-    #elif defined (ENV64)
+
+	uint32_t RuntimeCrc32(const char* _szData, size_t _uLen) {
+		uint32_t uHash = 0;
+		for (size_t i = 0; i < _uLen; i++) {
+			uHash = (uHash >> 8) ^ crc32_table[(uHash ^ _szData[i]) & 0xff];
+		}
+
+		return uHash ^ 0xffffffff;
+	}
+
 	uint64_t RuntimeCrc64(const std::string& _str) {
 		uint64_t uHash = 0;
 		for (size_t i = 0; i < _str.size(); i++) {
@@ -43,5 +51,13 @@ namespace cvar {
 
         return uHash ^ 0xffffffffffffffff;
     }
-    #endif
+
+	uint64_t RuntimeCrc64(const char* _szData, size_t _ulen) {
+		uint64_t uHash = 0;
+		for (size_t i = 0; i < _ulen; i++) {
+			uHash = (uHash >> 8) ^ crc64_table[(uHash ^ _szData[i]) & 0xff];
+		}
+
+		return uHash ^ 0xffffffffffffffff;
+	}
 }
