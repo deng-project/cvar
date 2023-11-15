@@ -55,6 +55,7 @@ namespace cvar {
                 Value* pDesc = _FindNode(_key);
                 if (pDesc)
                     return std::get_if<T>(pDesc);
+                return nullptr;
             }
 
             template <typename T>
